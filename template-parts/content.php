@@ -36,6 +36,35 @@ if ( isset( $custom_features['layout'] ) ) {
 	$layout = 'landscape';
 }
 
+// FEATURED VIDEO SUPPORT FIX
+$feature_type = get_field('feature_type');
+
+if ( $feature_type === 'video' ) {
+
+    // ACF field for video URL
+    $video_url  = get_field('featured_video_url');
+
+    // ACF field for uploaded video
+    $video_file = get_field('featured_video_file');
+
+    if ( $video_url ) {
+        echo '<div class="featured-video-wrapper">';
+        echo wp_oembed_get( $video_url ); // YouTube/Vimeo auto-embed
+        echo '</div>';
+        return;
+    }
+
+    if ( !empty($video_file['url']) ) {
+        echo '<div class="featured-video-wrapper">';
+        echo '<video controls preload="metadata" style="max-width:100%;height:auto;">';
+        echo '<source src="' . esc_url($video_file['url']) . '" type="video/mp4">';
+        echo '</video>';
+        echo '</div>';
+        return;
+    }
+}
+
+
 $images = wtvr_get_featured_images( get_the_ID() );
 
 $video = get_field( 'featured_video' );
@@ -116,7 +145,7 @@ $video = get_field( 'featured_video' );
 							// put related id into the sorted basket under it's post type key
 							$related_IDs_sorted[ $related_type ][] = $related_ID;
 						}
-						
+
 
 					}
 
@@ -340,8 +369,8 @@ $video = get_field( 'featured_video' );
 			  )
 			);
 
-            if ($related_IDs && 'people' === $post_type && 
-                isset($related_IDs_sorted['memorial-videos']) && 
+            if ($related_IDs && 'people' === $post_type &&
+                isset($related_IDs_sorted['memorial-videos']) &&
                 is_array($related_IDs_sorted['memorial-videos'])) {
 
                 foreach ($related_IDs_sorted['memorial-videos'] as $related_video_ID) {
