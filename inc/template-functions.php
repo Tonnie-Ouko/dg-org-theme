@@ -14,7 +14,7 @@ function get_books_ID_with_selected_lang($selected_language_id){
 		'posts_per_page' => -1,
 		'fields' => 'ids'
 	]);
-	
+
 	foreach($all_books as $book_id) {
 		if(have_rows('translations', $book_id)) {
 			while(have_rows('translations', $book_id)) {
@@ -33,7 +33,7 @@ function get_books_ID_with_selected_lang($selected_language_id){
 
 	return $posts_with_language;
 }
-				
+
 
 // return menu on archive page with ctps have posts in selected language
 function post_type_menu_filtered_by_language($post_type, $lang_id){
@@ -63,7 +63,7 @@ function post_type_menu_filtered_by_language($post_type, $lang_id){
 				);
 				$cpt_post = get_posts($args);
 			}
-			
+
 			//add menu item with current cpt if get post with selected language
 			if ( !empty($cpt_post) ){
 				$site_url = home_url();
@@ -77,8 +77,8 @@ function post_type_menu_filtered_by_language($post_type, $lang_id){
 		}
 
 	}
-	
-	return $post_type_menu_html;	
+
+	return $post_type_menu_html;
 }
 
 
@@ -93,7 +93,7 @@ function filter_cpt_by_language($query) {
 
 			if ( is_post_type_archive( 'books' ) ){
 				$posts_with_language = get_books_ID_with_selected_lang($selected_language_id);
-				
+
 				if(!empty($posts_with_language)) {
 					$query->set('post__in', $posts_with_language);
 				} else {
@@ -108,7 +108,7 @@ function filter_cpt_by_language($query) {
 						'terms'    => $selected_language_id,
 					),
 				));
-			}   
+			}
         } else { //book_language unset or empty
 			if ( in_array($query_post_type, $cpt_array, true) ) {
 				$query->set('tax_query', array(
@@ -341,26 +341,30 @@ function kstshn_isAssoc( array $arr ) {
  */
 function wtvr_get_featured_images( $post_id ) {
 
-	$post_gallery = get_field( 'featured_gallery', $post_id );
-	if ( $post_gallery ) {
-		return $post_gallery;
-	}
+    $post_gallery = get_field( 'featured_gallery', $post_id );
+    if ( $post_gallery ) {
+        return $post_gallery;
+    }
 
-	$post_thumb = get_post_thumbnail_id( $post_id );
-	if ( $post_thumb ) {
-		return [ $post_thumb ];
-	}
+    $post_thumb = get_post_thumbnail_id( $post_id );
+    if ( $post_thumb ) {
+        return [ $post_thumb ];
+    }
 
-	$attachment_rows = get_field( 'files', $post_id );
-	if ( $attachment_rows ) {
-		$file_ID = $attachment_rows[0]['file']['ID'];
+    // FIX: safe-check before accessing array offsets
+    $attachment_rows = get_field( 'files', $post_id );
 
-		return [ $file_ID ];
-	}
+    if ( !empty($attachment_rows) && is_array($attachment_rows) ) {
 
-	return false;
+        $first = $attachment_rows[0] ?? false;
+
+        if ( $first && !empty($first['file']['ID']) ) {
+            return [ $first['file']['ID'] ];
+        }
+    }
+
+    return false;
 }
-
 /**
  * Responsive aspect ratio image
  */
@@ -715,10 +719,10 @@ function get_unique_languages($post_id = null) {
     if (!$post_id) {
         $post_id = get_the_ID();
     }
-    
+
     $translations = get_field('translations', $post_id);
     $unique_languages = [];
-    
+
     if ($translations) {
         foreach ($translations as $translation) {
             if (isset($translation['language']) && is_array($translation['language'])) {
@@ -731,7 +735,7 @@ function get_unique_languages($post_id = null) {
         }
         asort($unique_languages);
     }
-    
+
     return $unique_languages;
 }
 
@@ -745,10 +749,10 @@ function get_earliest_publication_date($post_id = null) {
     if (!$post_id) {
         $post_id = get_the_ID();
     }
-    
+
     $translations = get_field('translations', $post_id);
     $earliest_year = false;
-    
+
     if ($translations) {
         foreach ($translations as $translation) {
             if (isset($translation['first_published']) && !empty($translation['first_published'])) {
@@ -761,6 +765,6 @@ function get_earliest_publication_date($post_id = null) {
             }
         }
     }
-    
+
     return $earliest_year;
 }
