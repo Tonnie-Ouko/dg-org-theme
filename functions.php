@@ -204,12 +204,10 @@ if (!is_user_logged_in()) {
 
 function itcoop_bsearch_posts_orderby( $orderby, $query ) {
 	global $wpdb;
-  
 	if ( $query->is_search() ) {
 	  $query->set('orderby', false);
 	  return false;
-	} 
-  
+	}
 	return $orderby;
   }
   add_filter( 'posts_orderby', 'itcoop_bsearch_posts_orderby', 9, 2 );
@@ -302,6 +300,10 @@ require 'inc/wp-tweaks.php';
  * Custom fields
  */
 require 'inc/custom-fields/_custom-fields.php';
+/**
+ * ALT texts featured image
+ */
+require_once get_template_directory() . '/inc/media.php';
 
 /**
  * SVG
